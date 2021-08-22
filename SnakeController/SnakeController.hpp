@@ -5,6 +5,8 @@
 
 #include "IEventHandler.hpp"
 #include "SnakeInterface.hpp"
+#include "FoodInterface.hpp"
+#include "DirectionInterface.hpp"
 #include <stdexcept>
 
 class Event;
@@ -24,6 +26,7 @@ struct UnexpectedEventException : std::runtime_error
 
 class Controller : public IEventHandler
 {
+    struct Segment;
 public:
     Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
 
@@ -31,6 +34,10 @@ public:
     Controller& operator=(Controller const& p_rhs) = delete;
 
     void receive(std::unique_ptr<Event> e) override;
+
+    Segment getNewHead() ;
+    void getNewFood(Segment newHead);
+    bool isNotLost(Segment newHead);
 
 private:
     struct Segment
