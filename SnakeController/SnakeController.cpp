@@ -227,8 +227,8 @@ void Controller::receive(std::unique_ptr<Event> e)
         case PauseInd::MESSAGE_ID:return handlePause();
         case TimeoutInd::MESSAGE_ID: if(!pause) return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e)); else return;
         case DirectionInd::MESSAGE_ID: if(!pause) return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e)); else return;
-        case FoodInd::MESSAGE_ID: /*if(!pause) */return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e)); //else return;
-        case FoodResp::MESSAGE_ID: /*if(!pause) */return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e)); //else return;
+        case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e)); 
+        case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e)); 
         default: throw UnexpectedEventException();
     };
 }
