@@ -197,7 +197,8 @@ void Controller::updateFoodPosition(int x, int y, std::function<void()> clearPol
     }
 
     clearPolicy();
-    sendPlaceNewFood(x, y);
+    if(!(x<0 || x>=100 || y < 0 || y >=100))
+        sendPlaceNewFood(x, y);
 }
 
 void Controller::handleFoodInd(std::unique_ptr<Event> e)
@@ -211,7 +212,12 @@ void Controller::handleFoodResp(std::unique_ptr<Event> e)
 {
     auto requestedFood = payload<FoodResp>(*e);
 
-    updateFoodPosition(requestedFood.x, requestedFood.y, []{});
+    updateFoodPosition(requestedFood.x, requestedFood.y, 
+    [&]
+    {
+        if(requestedFood.x<0 || requestedFood.x>=100 || requestedFood.y < 0 || requestedFood.y >=100)
+            m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+    });
 }
 
 void Controller::handlePauseInd(std::unique_ptr<Event> e)
