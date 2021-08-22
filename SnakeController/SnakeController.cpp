@@ -62,16 +62,6 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     }
 }
 
-bool Controller::isSegmentAtPosition(int x, int y) const
-{
-    return m_segments.end() !=  std::find_if(m_segments.cbegin(), m_segments.cend(),
-        [x, y](auto const& segment){ return segment.x == x and segment.y == y; });
-}
-
-bool Controller::isPositionOutsideMap(int x, int y) const
-{
-    return x < 0 or y < 0 or x >= m_mapDimension.first or y >= m_mapDimension.second;
-}
 
 void Controller::sendPlaceNewFood(int x, int y)
 {
@@ -119,7 +109,7 @@ bool perpendicular(Direction dir1, Direction dir2)
 }
 } // namespace
 
-Controller::Segment Controller::calculateNewHead() const
+Segment Controller::calculateNewHead() const
 {
     Segment const& currentHead = m_segments.front();
 
@@ -191,14 +181,13 @@ void Controller::handleDirectionInd(std::unique_ptr<Event> e)
 
 void Controller::updateFoodPosition(int x, int y, std::function<void()> clearPolicy)
 {
-    if (isSegmentAtPosition(x, y)) {
+    if (isSegmentAtPosition(x, y) || isPositionOutsideMap(x,y) ) {
         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
         return;
     }
 
     clearPolicy();
-    if(!(x<0 || x>=100 || y < 0 || y >=100))
-        sendPlaceNewFood(x, y);
+    sendPlaceNewFood(x, y);
 }
 
 void Controller::handleFoodInd(std::unique_ptr<Event> e)
@@ -212,12 +201,7 @@ void Controller::handleFoodResp(std::unique_ptr<Event> e)
 {
     auto requestedFood = payload<FoodResp>(*e);
 
-    updateFoodPosition(requestedFood.x, requestedFood.y, 
-    [&]
-    {
-        if(requestedFood.x<0 || requestedFood.x>=100 || requestedFood.y < 0 || requestedFood.y >=100)
-            m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-    });
+    updateFoodPosition(requestedFood.x, requestedFood.y, []{});
 }
 
 void Controller::handlePauseInd(std::unique_ptr<Event> e)
