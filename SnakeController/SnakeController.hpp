@@ -5,6 +5,7 @@
 
 #include "IEventHandler.hpp"
 #include "SnakeInterface.hpp"
+#include "EventT.hpp"
 #include <stdexcept>
 
 class Event;
@@ -31,6 +32,7 @@ public:
     Controller& operator=(Controller const& p_rhs) = delete;
 
     void receive(std::unique_ptr<Event> e) override;
+    void receive(std::unique_ptr<EventT<TimeoutInd>> e);
 
 private:
     void handleTimePassed(const TimeoutInd&);
