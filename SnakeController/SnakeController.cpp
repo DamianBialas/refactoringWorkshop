@@ -21,6 +21,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
       m_foodPort(p_foodPort),
       m_scorePort(p_scorePort)
 {
+    pause = false;
     std::istringstream istr(p_config);
     char w, f, s, d;
 
@@ -62,6 +63,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
         throw ConfigurationError();
     }
 }
+
 
 void Controller::handleTimePassed(const TimeoutInd&)
 {
@@ -213,14 +215,20 @@ Controller::Segment Controller::getNewHead() const
     return newHead;
 }
 
+void Controller::handlePause()
+{
+    pause = !pause;
+}
+
 void Controller::receive(std::unique_ptr<Event> e)
 {
     switch(e->getMessageId())
     {
-        case TimeoutInd::MESSAGE_ID: return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
-        case DirectionInd::MESSAGE_ID: return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));
-        case FoodInd::MESSAGE_ID: return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
-        case FoodResp::MESSAGE_ID: return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
+        case PauseInd::MESSAGE_ID:return handlePause();
+        case TimeoutInd::MESSAGE_ID: if(!pause) return handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e)); else return;
+        case DirectionInd::MESSAGE_ID: if(!pause) return handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e)); else return;
+        case FoodInd::MESSAGE_ID: /*if(!pause) */return handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e)); //else return;
+        case FoodResp::MESSAGE_ID: /*if(!pause) */return handleNewFood(*static_cast<EventT<FoodResp> const&>(*e)); //else return;
         default: throw UnexpectedEventException();
     };
 }

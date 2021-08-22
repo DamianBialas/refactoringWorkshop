@@ -32,11 +32,14 @@ public:
 
     void receive(std::unique_ptr<Event> e) override;
 
+    bool pause;
+
 private:
     void handleTimePassed(const TimeoutInd&);
     void handleDirectionChange(const DirectionInd&);
     void handleFoodPositionChange(const FoodInd& receivedFood);
     void handleNewFood(const FoodResp& requestedFood);
+    void handlePause();
 
     struct Segment
     {
